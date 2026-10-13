@@ -1,0 +1,1101 @@
+<!-- Case 1: You explicitly compile, then run -->
+Hello.java
+   │
+   │ javac Hello.java
+   ▼
+Hello.class
+   │
+   │ java Hello
+   ▼
+Program runs
+
+Here, you manually create the .class file.
+
+Example:
+
+javac Hello.java
+java Hello
+
+<!-- Case 2: You directly run the .java file -->
+
+With modern Java versions, you can do:
+java Hello.java
+
+In this case, Java does something like:
+Hello.java
+   │
+   │ java command internally compiles it
+   ▼
+Temporary/In-memory bytecode
+   │
+   ▼
+JVM executes it
+
+So even though you did not run javac yourself, Java still compiles the source code before executing it.
+You have JDK 25, so this feature is available  
+
+
+
+Java Code Execution — Complete Explanation
+
+Let's take the complete flow and understand what happens at each stage, why it happens, and how it connects to the next stage.
+
+
+
+
+                    JAVA CODE EXECUTION
+
+1. WRITE CODE
+       │
+       ▼
+   Main.java
+       │
+       ▼
+2. COMPILE
+   javac Main.java
+       │
+       ▼
+   Lexical Analysis
+       ↓
+   Syntax Analysis
+       ↓
+   Semantic Analysis
+       ↓
+   Bytecode Generation
+       │
+       ▼
+   Main.class
+   (Bytecode)
+       │
+       ▼
+3. RUN
+   java Main
+       │
+       ▼
+4. JVM STARTS
+       │
+       ▼
+5. CLASS LOADING
+       │
+       ├── Loading
+       │
+       ├── Linking
+       │     ├── Verification
+       │     ├── Preparation
+       │     └── Resolution
+       │
+       └── Initialization
+             ├── Static Variables
+             └── Static Blocks
+       │
+       ▼
+6. main() STARTS
+       │
+       ▼
+7. STACK FRAME CREATED
+       │
+       ├── Local Variables
+       └── Operand Stack
+       │
+       ▼
+8. METHOD CALLS
+       │
+       ├── New Stack Frame
+       └── Return → Frame Removed
+       │
+       ▼
+9. EXECUTION ENGINE
+       │
+       ├── Interpreter
+       └── JIT Compiler
+       │
+       ▼
+10. NATIVE MACHINE CODE
+       │
+       ▼
+      CPU
+       │
+       ▼
+     OUTPUT
+       │
+       ▼
+11. main() FINISHES
+       │
+       ▼
+    JVM TERMINATES
+
+
+
+We will use this example throughout:
+
+public class Main {
+
+    static int x = 100;
+
+    static {
+        System.out.println("Static block executed");
+    }
+
+    public static void main(String[] args) {
+        int a = 10;
+        int b = 20;
+
+        int sum = add(a, b);
+
+        System.out.println(sum);
+    }
+
+    public static int add(int x, int y) {
+        return x + y;
+    }
+}
+
+
+<!-- 1. WRITE CODE -->
+
+You write Java code in a text file:
+
+Main.java
+
+This is called Java source code.
+
+At this point, the file contains human-readable instructions:
+
+int a = 10;
+int b = 20;
+
+But the CPU cannot directly understand Java syntax.
+
+The CPU ultimately understands machine instructions, so Java source code must first be processed.
+
+Therefore:
+
+Main.java
+    ↓
+Compiler
+
+
+<!-- 2. COMPILE — javac Main.java -->
+
+You compile the program using:
+
+javac Main.java
+
+javac is the Java compiler.
+
+The compiler processes your source code in several stages.
+
+Main.java
+    │
+    ▼
+Lexical Analysis
+    │
+    ▼
+Syntax Analysis
+    │
+    ▼
+Semantic Analysis
+    │
+    ▼
+Bytecode Generation
+    │
+    ▼
+Main.class
+
+<!-- 2.1 Lexical Analysis -->
+
+The compiler first reads the characters and breaks them into meaningful units called tokens.
+
+Example:
+
+int a = 10;
+
+The compiler identifies:
+
+int  → Keyword
+a    → Identifier
+=    → Assignment operator
+10   → Integer literal
+;    → Separator
+
+So:
+
+Characters
+    ↓
+Tokens
+
+The compiler now understands the individual pieces of your program.
+
+<!-- 2.2 Syntax Analysis -->
+
+Next, the compiler checks whether those tokens follow the grammar rules of Java.
+
+This is valid:
+
+int a = 10;
+
+This is invalid:
+
+int = a 10;
+
+Even though both contain recognizable tokens, the second one does not follow Java's syntax.
+
+Conceptually:
+
+Tokens
+   ↓
+Does this follow Java grammar?
+   │
+   ├── Yes → Continue
+   │
+   └── No → Syntax Error
+
+The compiler creates an internal representation of the structure of the program, often represented conceptually as an Abstract Syntax Tree (AST).
+
+For:
+
+int sum = add(a, b);
+
+conceptually:
+
+Variable Declaration
+│
+├── Type → int
+├── Variable → sum
+│
+└── Method Call
+     │
+     ├── Method → add
+     ├── Argument → a
+     └── Argument → b
+
+
+<!-- 2.3 Semantic Analysis -->
+
+Now the compiler checks whether your program makes sense according to Java rules.
+
+For example:
+
+int a = 10;
+String name = a;
+
+The syntax is valid, but the types are incompatible.
+
+Similarly:
+
+int sum = add(a, b);
+
+The compiler checks:
+
+Does add() exist?
+        ↓
+Does it accept two arguments?
+        ↓
+Are a and b valid arguments?
+        ↓
+Does add() return an int?
+        ↓
+Can the result be stored in sum?
+
+<!-- Other checks include: -->
+
+Type checking
+Variable existence
+Method existence
+Access modifiers
+Inheritance rules
+Exception-related compile-time checks
+
+If something is wrong:
+
+Compile-time Error
+
+No successfully compiled program is produced.
+
+
+<!-- 2.4 Bytecode Generation -->
+
+If everything is valid, the compiler generates:
+
+Main.class
+
+This file contains Java bytecode.
+
+So:
+
+Main.java
+     │
+     │ javac
+     ▼
+Main.class
+
+Bytecode is an intermediate instruction format.
+
+It is not Java source code and generally not native CPU machine code.
+
+It is designed to be executed by the JVM.
+
+You can inspect bytecode using:
+
+javap -c Main
+
+<!-- 3. RUN — java Main -->
+
+Now you execute:
+
+java Main
+
+Remember the difference:
+
+javac Main.java
+        ↓
+Compiles source code
+        ↓
+Creates Main.class
+
+
+java Main
+        ↓
+Starts the Java runtime/JVM
+        ↓
+Executes the Main class
+
+When you type:
+
+java Main
+
+the operating system starts a Java process, and the JVM begins preparing to execute your program.
+
+The JVM does not simply send the entire .class file directly to the CPU.
+
+First, classes must be loaded and prepared.
+
+<!-- 4. JVM STARTS -->
+
+The JVM is responsible for running Java bytecode.
+
+Conceptually:
+
+Operating System
+       │
+       ▼
+Java Process
+       │
+       ▼
+JVM
+       │
+       ├── Loads Classes
+       ├── Manages Memory
+       ├── Executes Bytecode
+       ├── Performs JIT Compilation
+       └── Performs Garbage Collection
+
+The JVM now needs to execute your:
+
+Main
+
+class.
+
+That brings us to class loading.
+
+<!-- 5. CLASS LOADING -->
+
+The JVM lifecycle for a class is:
+
+Class
+  │
+  ▼
+Loading
+  │
+  ▼
+Linking
+  │
+  ├── Verification
+  ├── Preparation
+  └── Resolution
+  │
+  ▼
+Initialization
+
+<!-- 5.1 Loading -->
+
+The Class Loader locates and reads:
+
+Main.class
+
+Conceptually:
+
+Disk
+
+Main.class
+    │
+    ▼
+Class Loader
+    │
+    ▼
+Class information becomes available to JVM
+
+The JVM obtains information such as:
+
+Class Name → Main
+
+Methods:
+    main()
+    add()
+
+Fields:
+    static int x
+
+Superclass:
+    Object
+
+Your program may also need other classes.
+
+For:
+
+System.out.println(sum);
+
+Java needs classes and runtime components related to:
+
+System
+PrintStream
+
+Classes are not necessarily all loaded at the very beginning. The JVM can load classes as they become necessary.
+
+5.2 LINKING
+
+After loading, the class goes through linking.
+
+Linking
+│
+├── Verification
+├── Preparation
+└── Resolution
+A. Verification
+
+The JVM checks whether the bytecode is valid and safe to execute.
+
+Conceptually:
+
+Main.class
+    │
+    ▼
+Bytecode Verifier
+    │
+    ├── Valid structure?
+    ├── Valid instructions?
+    ├── Correct type usage?
+    └── Valid stack operations?
+    │
+    ▼
+Verified Bytecode
+
+This is important because the JVM should not blindly execute arbitrary invalid bytecode.
+
+<!-- B. Preparation -->
+
+The JVM prepares storage for class variables.
+
+Example:
+
+static int x = 100;
+
+During preparation, the JVM prepares the class-level storage needed for this field.
+
+Then during initialization, the actual Java initialization logic, such as assigning 100, is executed.
+
+So conceptually:
+
+Preparation
+    ↓
+Prepare storage
+
+Initialization
+    ↓
+Execute initialization logic
+
+<!-- C. Resolution -->
+
+The bytecode contains symbolic references to classes, methods, and fields.
+
+For example, your code refers to:
+
+add(a, b);
+
+and:
+
+System.out.println(sum);
+
+The JVM must connect these symbolic references to the appropriate runtime classes, methods, or fields.
+
+Conceptually:
+
+Symbolic Reference
+        │
+        ▼
+Find the actual runtime target
+        │
+        ▼
+Class / Method / Field
+
+Resolution may occur when needed rather than necessarily resolving everything immediately.
+
+<!-- 5.3 INITIALIZATION -->
+
+After linking, the class is initialized when initialization is required.
+
+Our example contains:
+
+static int x = 100;
+
+static {
+    System.out.println("Static block executed");
+}
+
+The initialization logic runs in source-defined order.
+
+Conceptually:
+
+Class Initialization
+       │
+       ▼
+static int x = 100
+       │
+       ▼
+static block
+       │
+       ▼
+"Static block executed"
+       │
+       ▼
+main()
+
+Therefore, the output begins with:
+
+Static block executed
+
+before the code inside main() runs.
+
+Important
+JVM starts
+    ↓
+Class preparation/loading/linking
+    ↓
+Class initialization
+    ↓
+Static fields and static blocks
+    ↓
+main()
+
+So main() is the entry point for the application's main execution, but static initialization associated with the class happens before its body executes.
+
+6. main() STARTS
+
+Now the JVM invokes:
+
+public static void main(String[] args)
+
+The JVM creates an execution context for the method.
+
+Since every Java thread has its own stack, the main thread gets a stack frame for main().
+
+Main Thread Stack
+
+┌─────────────────────────┐
+│                         │
+│      main() Frame       │
+│                         │
+└─────────────────────────┘
+
+This frame contains the data needed to execute the method.
+
+7. STACK FRAME CREATED
+
+A simplified stack frame contains:
+
+Stack Frame
+│
+├── Local Variable Array
+│
+├── Operand Stack
+│
+└── Additional frame information
+
+These are very important for understanding JVM bytecode execution.
+
+7.1 Local Variables
+
+Consider:
+
+public static void main(String[] args) {
+    int a = 10;
+    int b = 20;
+}
+
+Conceptually, the frame can contain slots such as:
+
+Local Variables
+
+Slot 0 → args
+Slot 1 → a = 10
+Slot 2 → b = 20
+
+Because main() is static, it does not have:
+
+this
+
+For an instance method:
+
+public void test(int x) {
+}
+
+conceptually:
+
+Slot 0 → this
+Slot 1 → x
+7.2 Operand Stack
+
+The JVM bytecode execution model uses an operand stack.
+
+Suppose Java executes:
+
+int a = 10;
+
+Conceptually:
+
+Push 10
+   │
+   ▼
+
+Operand Stack
+
+┌────┐
+│ 10 │
+└────┘
+
+Then the value is stored into a local variable.
+
+Operand Stack
+       │
+       ▼
+Local Variable Slot
+
+a = 10
+
+The operand stack is then ready for the next operation.
+
+8. METHOD CALLS
+
+Now our program executes:
+
+int sum = add(a, b);
+
+The JVM must call:
+
+add(10, 20)
+
+First, the values are prepared for the method call.
+
+Conceptually:
+
+Load a → 10
+Load b → 20
+        │
+        ▼
+Call add(10, 20)
+A new stack frame is created
+
+Before calling add():
+
+Thread Stack
+
+┌──────────────────┐
+│ main()           │ ← Currently executing
+└──────────────────┘
+
+When add() is called:
+
+Thread Stack
+
+┌──────────────────┐
+│ add()            │ ← Currently executing
+├──────────────────┤
+│ main()           │
+└──────────────────┘
+
+The main() method is paused while add() executes.
+
+Inside:
+
+public static int add(int x, int y) {
+    return x + y;
+}
+
+the new frame has its own local variables:
+
+add() Local Variables
+
+Slot 0 → x = 10
+Slot 1 → y = 20
+Performing x + y
+
+Conceptually, the values are placed on the operand stack:
+
+Operand Stack
+
+┌────┐
+│ 20 │ ← top
+├────┤
+│ 10 │
+└────┘
+
+The integer addition operation:
+
+iadd
+
+conceptually does:
+
+Pop 20
+Pop 10
+   │
+   ▼
+10 + 20
+   │
+   ▼
+Push 30
+
+Now:
+
+Operand Stack
+
+┌────┐
+│ 30 │
+└────┘
+
+Then the result is returned.
+
+Return → Frame Removed
+
+When:
+
+return x + y;
+
+finishes:
+
+add() Frame
+      │
+      ▼
+Return value = 30
+      │
+      ▼
+add() Frame is removed
+      │
+      ▼
+Execution returns to main()
+
+The stack becomes:
+
+┌──────────────────┐
+│ main()           │ ← Execution continues
+└──────────────────┘
+
+The returned value is stored in:
+
+int sum = 30;
+9. EXECUTION ENGINE
+
+The JVM's execution engine is responsible for executing bytecode.
+
+Simplified:
+
+Execution Engine
+│
+├── Interpreter
+│
+└── JIT Compiler
+9.1 Interpreter
+
+The interpreter executes bytecode instructions.
+
+Conceptually:
+
+Bytecode Instruction 1
+        ↓
+Execute
+
+Bytecode Instruction 2
+        ↓
+Execute
+
+Bytecode Instruction 3
+        ↓
+Execute
+
+This is useful, especially when code begins executing.
+
+But repeatedly interpreting the same frequently executed code can add overhead.
+
+For example:
+
+for (int i = 0; i < 1000000; i++) {
+    add(10, 20);
+}
+
+The same code may execute many times.
+
+This is where JIT compilation helps.
+
+9.2 JIT Compiler
+
+JIT means:
+
+Just-In-Time Compiler
+
+The JVM can detect frequently executed code paths.
+
+Conceptually:
+
+Bytecode
+    │
+    ▼
+Interpreter starts execution
+    │
+    ▼
+Code becomes frequently executed
+    │
+    ▼
+JIT Compiler
+    │
+    ▼
+Native Machine Code
+    │
+    ▼
+Optimized execution
+
+The JIT compiler can optimize code using runtime information.
+
+So Java execution is not simply:
+
+Always interpret every instruction forever
+
+Instead, the JVM can compile important/hot code into native machine code for faster execution.
+
+10. NATIVE MACHINE CODE
+
+The CPU cannot execute Java bytecode directly.
+
+Ultimately, the operations being executed must be performed using instructions understood by the processor.
+
+Conceptually:
+
+Java Source Code
+       │
+       ▼
+Bytecode
+       │
+       ▼
+JVM Execution
+       │
+       ├── Interpreter
+       │
+       └── JIT Compilation
+               │
+               ▼
+       Native Machine Instructions
+               │
+               ▼
+              CPU
+
+The exact native instructions depend on the processor architecture.
+
+For example:
+
+x86-64
+ARM64
+
+can have different machine instruction sets.
+
+This is one reason Java bytecode helps with portability: the same Java bytecode can be executed by JVM implementations designed for different platforms.
+
+CPU EXECUTION AND OUTPUT
+
+Now consider:
+
+System.out.println(sum);
+
+The JVM executes the required method calls.
+
+Conceptually:
+
+System
+   │
+   ▼
+out
+   │
+   ▼
+PrintStream object
+   │
+   ▼
+println(sum)
+   │
+   ▼
+Standard Output
+   │
+   ▼
+Operating System / Terminal
+   │
+   ▼
+Screen
+
+The user sees:
+
+30
+
+So the complete chain is:
+
+Java statement
+      ↓
+Bytecode operation
+      ↓
+JVM execution
+      ↓
+Required Java library methods
+      ↓
+Operating system output facilities
+      ↓
+Terminal/Console
+11. main() FINISHES
+
+Eventually, the last statement in main() executes.
+
+System.out.println(sum);
+
+Then main() reaches its end.
+
+The main() stack frame is removed.
+
+Before:
+
+Main Thread Stack
+
+┌──────────────────┐
+│ main()           │
+└──────────────────┘
+
+After main() returns:
+
+Main Thread Stack
+
+(empty)
+
+Conceptually:
+
+main() completes
+       │
+       ▼
+main() stack frame removed
+       │
+       ▼
+Main thread finishes
+JVM TERMINATES
+
+If no remaining non-daemon threads are running, the JVM can terminate.
+
+main() finishes
+       │
+       ▼
+Are non-daemon threads still running?
+       │
+   ┌───┴───┐
+   │       │
+  Yes      No
+   │       │
+   ▼       ▼
+JVM keeps   JVM
+running     terminates
+
+Therefore, normally:
+
+main() finishes
+      ↓
+All required non-daemon threads finish
+      ↓
+JVM shuts down
+Final Complete Mental Model
+                         JAVA PROGRAM
+
+YOU WRITE CODE
+      │
+      ▼
+Main.java
+      │
+      ▼
+┌─────────────────────────────┐
+│       JAVAC COMPILER        │
+│                             │
+│ Lexical Analysis            │
+│        ↓                    │
+│ Syntax Analysis             │
+│        ↓                    │
+│ Semantic Analysis           │
+│        ↓                    │
+│ Bytecode Generation         │
+└──────────────┬──────────────┘
+               │
+               ▼
+           Main.class
+            Bytecode
+               │
+               │ java Main
+               ▼
+┌─────────────────────────────────────┐
+│                 JVM                 │
+│                                     │
+│  1. Class Loading                   │
+│       │                             │
+│       ├── Loading                   │
+│       │                             │
+│       ├── Linking                   │
+│       │     ├── Verification        │
+│       │     ├── Preparation         │
+│       │     └── Resolution          │
+│       │                             │
+│       └── Initialization            │
+│             ├── Static variables    │
+│             └── Static blocks       │
+│                                     │
+│  2. main() starts                   │
+│       │                             │
+│       ▼                             │
+│  3. Stack Frame                     │
+│       ├── Local Variables           │
+│       └── Operand Stack             │
+│       │                             │
+│       ▼                             │
+│  4. Method Calls                    │
+│       ├── New Frame                 │
+│       └── Return → Remove Frame     │
+│       │                             │
+│       ▼                             │
+│  5. Execution Engine                │
+│       ├── Interpreter               │
+│       └── JIT Compiler              │
+└──────────────────┬──────────────────┘
+                   │
+                   ▼
+        Native Machine Instructions
+                   │
+                   ▼
+                  CPU
+                   │
+                   ▼
+             Program Output
+                   │
+                   ▼
+             main() finishes
+                   │
+                   ▼
+            JVM Terminates
+Quick revision in one sentence
+
+Java source code is compiled by javac into bytecode; the JVM loads and prepares the required classes, initializes them, creates stack frames to execute methods, uses the interpreter and JIT compiler to execute bytecode as native instructions, sends results to the CPU and output system, and finally terminates when the program's non-daemon threads have finished.
