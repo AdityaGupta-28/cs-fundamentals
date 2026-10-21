@@ -1,0 +1,63 @@
+
+SELECT * , max(salary) over(partition by department_name) as max_salary
+from employee;
+
+<!-- row_number()  -->
+
+select *, row_number() over() as row from employee;
+
+select *, row_number() over(partition by department_name order by id desc) as rn 
+from employee;
+
+<!-- - Fetch the first 2 employees from each department to join the company. -->
+
+select * from( 
+    row_number() over(partition by department_name order by id) as row 
+    from employee
+) x
+where x.row<3;
+
+<!--  --></3>
+
+<!-- Fetch the top 3 employees in each department earning the max salary. -->
+
+select e.* from(
+    rank() over(partition by department_name order by salary desc) as rank 
+    from employee e
+) x
+where x.rank<4;
+
+<!-- dense_rank()   -->
+
+select e.* , rank() over(partition by department_name order by salary desc) as rank ,
+dense_rank() over(partition by department_name order by salary desc) as dense_rank 
+from employee e;
+ 
+
+rank - skips the rank the value if duplicates values are previously (i.e 1 2 2 4)
+dense_rank - don't skips (1 2 2 3)
+
+<!-- fetch a query to display if the salary of an employee is higher, lower or equal to the previous employee. -->
+select e.* , 
+lag(salary) over(partition by department_name order by id) as prev_emp_salary
+lead(salary) over(partition by department_name order by id) as next_emp_salary
+from employee e;
+
+select e.* , 
+lag(salary, 2, 0) over(partition by department_name order by id) as prev_2_emp_salary,
+lead(salary,2,0) over(partition by department_name order by id)as nxt_2_greater_emp_salary
+from employee e;
+
+in the above case if previous value is absent then null is displayed but in the second one default will be 0 if absent
+and the value 2 here is going to check previous 2 records
+
+<!-- similary lead function is used for next value comparisions  -->
+
+
+select e. * ,
+lag(salary) over(partition by dept_name order by emp_id) as prev_emp_salary,
+case when e.salary > lag (salary) over (partition by dept_name order by emp_id) then 'Higher than previous employee'
+when e. salary < lag (salary) over (partition by dept_name order by emp_id) then 'Lower than previous employee'
+when e. salary = lag (salary) over (partition by dept_name order by emp_id) then 'Same as than previous employee'
+end sal_range
+from employee e;
