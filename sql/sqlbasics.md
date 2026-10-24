@@ -541,7 +541,9 @@ Candidate Keys:
 
 One candidate key is selected as the primary key.
 
-28. Primary Key
+ 28. Unique Key - A Unique Key ensures that all values in a column are completely distinct across all rows.
+
+29. Primary Key
 Uniquely identifies every row.
 
 CREATE TABLE employees (
@@ -557,7 +559,7 @@ PRIMARY KEY
 
 A table can have one primary-key constraint, though that primary key can contain multiple columns.
 
-29. Alternate Key
+30. Alternate Key
 Candidate keys that were not selected as the primary key.
 Then there a question may arise then what is difference between candidate key and primary key, so candidate key contains 
 primary key while alternate key doesn't.
@@ -568,7 +570,7 @@ Candidate Keys:
 ├── email       ← Alternate Key
 └── phone       ← Alternate Key
 
-30. Composite Key
+31. Composite Key
 A key consisting of multiple columns.
 Neither column alone is unique.
 
@@ -582,7 +584,7 @@ Multiple columns
 Together identify row
 
 
-31. Foreign Key
+32. Foreign Key
 A foreign key establishes a relationship between tables.
 
 departments
@@ -606,16 +608,15 @@ CREATE TABLE employees (
 
 A foreign key value generally must correspond to a referenced key value, unless it is allowed to be NULL.
 
-31. Primary Key vs Foreign Key
-Primary Key	Foreign Key
-Identifies row	Establishes relationship
-Unique	Can repeat
-Cannot be NULL	Can be NULL unless restricted
-One PK constraint per table	Multiple FKs possible
-Entity identity	Reference to another table
+33. Primary Key         vs       Foreign Key
+Primary Key	                      Foreign Key
+Identifies row  	            Establishes relationship
+Unique	                         Can repeat
+Cannot be NULL          	    Can be NULL unless restricted
+One PK constraint per table	    Multiple FKs possible
+Entity identity	                Reference to another table
 
 Example:
-
 departments
 ┌─────────────┐
 │ id PK       │
@@ -630,8 +631,9 @@ employees
 │ name             │
 │ department_id FK │
 └──────────────────┘
-32. Constraints
 
+
+34. Constraints
 Constraints enforce rules on data.
 
 CONSTRAINTS
@@ -642,50 +644,49 @@ CONSTRAINTS
 ├── NOT NULL
 ├── CHECK
 └── DEFAULT
-NOT NULL
-name VARCHAR(50) NOT NULL
 
+* NOT NULL
+name VARCHAR(50) NOT NULL
 Value must be supplied.
 
-UNIQUE
+* UNIQUE
 email VARCHAR(100) UNIQUE
-
 Duplicate values aren't allowed.
 
-CHECK
+* CHECK
 salary INT CHECK (salary > 0)
-
 Enforces a condition.
 
-DEFAULT
+* DEFAULT
 status VARCHAR(20) DEFAULT 'ACTIVE'
-
 If no value is supplied, ACTIVE is used.
 
-33. JOINs
 
+35. JOINs
 JOINs combine data from multiple tables.
+Standard SQL joins are horizontal because they combine tables side-by-side by adding new columns based on a shared key.
 
 Suppose:
-
 employees
 id	name	department_id
 1	Rahul	10
 2	Aman	20
 3	Priya	10
+
 departments
 id	name
 10	IT
 20	HR
 30	Finance
 
-Relationship:
 
+Relationship:
 employees.department_id
           ↓
 departments.id
-34. INNER JOIN
 
+
+36. INNER JOIN
 Returns only matching rows.
 
 SELECT e.name, d.name
@@ -694,15 +695,11 @@ INNER JOIN departments d
 ON e.department_id = d.id;
 
 Mental model:
-
-A ∩ B
-
+A ∩ B (intersection) -- common elements
 Only rows with matches on both sides.
 
-35. LEFT JOIN
-
+37. LEFT JOIN
 Returns:
-
 All rows from the left table + matching rows from right table.
 
 SELECT e.name, d.name
@@ -711,15 +708,11 @@ LEFT JOIN departments d
 ON e.department_id = d.id;
 
 If an employee has no matching department:
-
 employee → NULL
-
 The employee still appears.
 
 36. RIGHT JOIN
-
 Returns:
-
 All rows from the right table + matching rows from left table.
 
 SELECT e.name, d.name
@@ -730,7 +723,6 @@ ON e.department_id = d.id;
 Useful when you want every department, including departments with no employees.
 
 37. FULL OUTER JOIN
-
 Returns all rows from both sides:
 
 matches
@@ -741,12 +733,11 @@ unmatched right
 
 Conceptually:
 
-A ∪ B
+A ∪ B - Union(don't includes duplicates)
 
 MySQL doesn't directly support FULL OUTER JOIN; it can be simulated using combinations of LEFT JOIN, RIGHT JOIN, and UNION.
 
 38. CROSS JOIN
-
 Produces a Cartesian product.
 
 SELECT *
@@ -754,12 +745,10 @@ FROM colors
 CROSS JOIN sizes;
 
 If:
-
 colors = 3 rows
 sizes = 4 rows
 
 result:
-
 3 × 4 = 12 rows
 
 Mental model:
@@ -767,6 +756,7 @@ Mental model:
 Every A
    ×
 Every B
+
 39. SELF JOIN
 
 A table joins with itself.

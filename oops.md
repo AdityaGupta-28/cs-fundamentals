@@ -301,3 +301,8 @@ L — Liskov Substitution	A subtype should be usable wherever its parent type is
 I — Interface Segregation	Prefer small, focused interfaces over one large interface	Separate Printable and Scannable
 D — Dependency Inversion	High-level logic should depend on abstractions rather than concrete implementation details	Inject a PaymentMethod instead of constructing a particular payment provider inside a service
 These principles are guidelines for maintainable design, not rigid rules that must be applied identically in every class.
+
+
+Association	General relationship between objects
+Aggregation	Whole-part relationship with independent parts
+Composition	Stronger ownership of component objects
