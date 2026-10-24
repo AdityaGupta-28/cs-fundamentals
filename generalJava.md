@@ -38,3 +38,17 @@ Integer wrappedNum = num; // Autoboxing
 • Unboxing: Automatic conversion of a wrapper class object back into its corresponding primitive type.java
 Integer wrappedNum = 10;
 int num = wrappedNum; // Unboxing
+
+## The number is power of 2 only if it have only 1 set bit eg.- 1000=8;
+
+n       = 1100
+n - 1   = 1011  //// n-1 = reverse all bits including first set bit from the right eg. = 1000 => n-1 = 0111
+AND     = 1000
+
+
+## Check whether a particular bit is set
+To check bit position k, counting from position 0 on the right:
+(n & (1 << k)) != 0
+
+// Toggle the bit
+number ^= (1 << position); 
